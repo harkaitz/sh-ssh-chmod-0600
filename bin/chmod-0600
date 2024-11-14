@@ -1,0 +1,49 @@
+#!/bin/sh -e
+##:
+#h: Usage: chmod-0600 [-u USER] FILE...
+#h:
+#h: Make files only read and write for the current user using
+#h: chmod(1) in UNIX and icacls in Windows (Busybox for Windows).
+##:
+chmod_0600() {
+    local OPTIND optopt opt_user= arg
+    
+    ## Parse command line arguments.
+    while getopts "u:" optopt; do
+        case $optopt in
+            u)  opt_user="${OPTARG}";;
+            \?) return 1;;
+        esac
+    done
+    shift $(( $OPTIND - 1 ))
+    
+    ## Change the permissions.
+    case "$(uname -s)" in
+        Windows_NT|*MSYS*|*MING*|*CYG*)
+            opt_user="${opt_user:-${USERNAME}}"
+            for arg in "$@"; do
+                arg="$(printf '%s\n' "${arg}" | tr '/' '\\')"
+                icacls "${arg}" /inheritance:r
+                icacls "${arg}" /grant:r "${opt_user}:(R,W)"
+            done
+            ;;
+        *)
+            opt_user="${opt_user:-$(whoami)}"
+            if test @"$(whoami)" = @"${opt_user}"; then
+                chmod 0600 "$@"
+            elif test @"$(whoami)" = @"root"; then
+                chown "${opt_user}:${opt_user}" "$@"
+                chmod 0600 "$@"
+            else
+                echo >&2 "error: To change the user run as root."
+                return 1
+            fi
+            ;;
+    esac
+}
+if test @"${SCRNAME:-$(basename "$0")}" = @"chmod-0600"; then
+    case "${1}" in
+        ''|-h|--help) sed -n 's/^ *#h: \{0,1\}//p' "$0";;
+        *)            chmod_0600 "$@"; exit 0;;
+    esac
+fi
