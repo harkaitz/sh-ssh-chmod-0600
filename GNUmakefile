@@ -2,7 +2,7 @@
 .SUFFIXES:
 .PHONY: all clean install check
 
-PROJECT   =ssh-chmod-0600
+PROJECT   =win-busybox-ssh
 VERSION   =1.0.0
 PREFIX    =/usr/local
 BUILDDIR ?=.build
@@ -24,4 +24,5 @@ install: install-sh
 install-sh:
 	mkdir -p $(DESTDIR)$(PREFIX)/bin
 	cp bin/chmod-0600 $(DESTDIR)$(PREFIX)/bin
+	cp bin/ssh-h-windows-set-busybox $(DESTDIR)$(PREFIX)/bin
 ## -- BLOCK:sh --

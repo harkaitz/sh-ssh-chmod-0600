@@ -1,1 +1,1 @@
-Change permissions of files to 0600 in Windows and UNIX. Required by OpenSSH.
+Scripts for managing MS Windows machines using OpenSSH.
